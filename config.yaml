@@ -1,0 +1,52 @@
+---
+- hosts: all
+  become: true
+  
+  vars: 
+    motd:
+      - Ansible Managed node by roy
+    username: NewUser
+
+  tasks:
+
+  - name: install python3 and pip3
+    package:
+      name:
+        - python3
+        - python3-pip
+      state: latest
+      update_cache: yes
+
+  - name: default python
+    lineinfile:
+      path: /etc/alternatives/python
+      line: /usr/bin/python3
+      create: yes
+
+  - name: default pip
+    lineinfile:
+      path: /etc/alternatives/pip
+      line: /usr/bin/pip3
+      create: yes
+
+  - name: install java open-jdk for Ubuntu
+    apt:
+      name: openjdk-11-jdk 
+      state: latest
+    when: ansible_distribution == 'Ubuntu'
+
+  - name: install java open-jdk for CentOS
+    yum:
+      name: java-11-openjdk-devel
+      state: latest
+    when: ansible_distribution == 'CentOS'
+
+  - name: set MOTD
+    ansible.builtin.debug:
+      msg: "{{ motd }}"
+
+  - name: create a user
+    user:
+      name: "{{ username }}"
+      state: present
+
